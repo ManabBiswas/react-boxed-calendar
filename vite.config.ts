@@ -1,11 +1,12 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import { libInjectCss } from "vite-plugin-lib-inject-css";
 import { resolve } from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), libInjectCss()],
   build: {
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
@@ -23,5 +24,6 @@ export default defineConfig({
         },
       },
     },
+    emptyOutDir: false,
   },
 });

@@ -99,13 +99,13 @@ const Calendar = ({
     selectedText: "text-white",
 
     todayBg: "bg-blue-100",
-    todayText: "text-blue-600",
+    todayText: "text-blue-700",
 
     normalText: "text-gray-700",
-    normalHoverBg: "hover:bg-gray-200",
+    normalHoverBg: "hover:bg-gray-100",
 
-    disabledBg: "bg-gray-100",
-    disabledText: "text-gray-400",
+    disabledBg: "bg-gray-50",
+    disabledText: "text-gray-300",
 
     borderRadius: "rounded-xl",
   },
@@ -135,25 +135,42 @@ const Calendar = ({
 
   const isToday = (date: Date) => sameDay(date, new Date());
 
-  const dateIsBefore = (a: Date, b: Date) =>
-    a.setHours(0, 0, 0, 0) < b.setHours(0, 0, 0, 0);
-  const dateIsAfter = (a: Date, b: Date) =>
-    a.setHours(0, 0, 0, 0) > b.setHours(0, 0, 0, 0);
+  const dateIsBefore = (a: Date, b: Date) => {
+    const dateA = new Date(a);
+    const dateB = new Date(b);
+    dateA.setHours(0, 0, 0, 0);
+    dateB.setHours(0, 0, 0, 0);
+    return dateA.getTime() < dateB.getTime();
+  };
+
+  const dateIsAfter = (a: Date, b: Date) => {
+    const dateA = new Date(a);
+    const dateB = new Date(b);
+    dateA.setHours(0, 0, 0, 0);
+    dateB.setHours(0, 0, 0, 0);
+    return dateA.getTime() > dateB.getTime();
+  };
 
   const shouldDisable = (date: Date) => {
-    if (
-      disablePastDates &&
-      minDate &&
-      dateIsBefore(new Date(date), new Date(minDate))
-    )
-      return true;
+    if (disablePastDates) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const checkDate = new Date(date);
+      checkDate.setHours(0, 0, 0, 0);
+      if (checkDate < today) return true;
+    }
 
-    if (
-      disableFutureDates &&
-      maxDate &&
-      dateIsAfter(new Date(date), new Date(maxDate))
-    )
-      return true;
+    if (minDate && dateIsBefore(date, minDate)) return true;
+
+    if (disableFutureDates) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const checkDate = new Date(date);
+      checkDate.setHours(0, 0, 0, 0);
+      if (checkDate > today) return true;
+    }
+
+    if (maxDate && dateIsAfter(date, maxDate)) return true;
 
     if (disableWeekends && (date.getDay() === 0 || date.getDay() === 6))
       return true;
@@ -176,7 +193,7 @@ const Calendar = ({
       if (!start || (start && end)) {
         onRangeChange(date, null);
       } else if (start && !end) {
-        if (dateIsBefore(new Date(date), new Date(start))) {
+        if (dateIsBefore(date, start)) {
           onRangeChange(date, start);
         } else {
           onRangeChange(start, date);
@@ -211,19 +228,22 @@ const Calendar = ({
   const days = getDays();
 
   return (
-    <div className="p-4 bg-white rounded-2xl shadow border border-gray-100">
+    <div className="p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         {!disableMonthNav && (
           <button
             onClick={() => changeMonth(-1)}
-            className="p-2 hover:bg-gray-200 rounded-full"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Previous month"
           >
-            ◀
+            <svg className="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
         )}
 
-        <h2 className="font-bold text-lg">
+        <h2 className="font-bold text-xl text-gray-900">
           {locale.monthNames![currentMonth.getMonth()]}{" "}
           {currentMonth.getFullYear()}
         </h2>
@@ -231,19 +251,22 @@ const Calendar = ({
         {!disableMonthNav && (
           <button
             onClick={() => changeMonth(1)}
-            className="p-2 hover:bg-gray-200 rounded-full"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Next month"
           >
-            ▶
+            <svg className="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         )}
       </div>
 
       {/* Week days */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
+      <div className="grid grid-cols-7 gap-2 mb-2">
         {locale.weekDays!.map((d) => (
           <div
             key={d}
-            className="text-center font-semibold text-gray-600 text-xs"
+            className="text-center font-semibold text-gray-600 text-sm py-2"
           >
             {d}
           </div>
@@ -251,7 +274,7 @@ const Calendar = ({
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-2 place-items-center">
         {days.map((day, i) => {
           if (!day) return <div key={i} className={cellSize} />;
 
@@ -274,27 +297,57 @@ const Calendar = ({
               key={day.toISOString()}
               disabled={disabled}
               onClick={() => handleSelect(day)}
-              className={[
-                "flex items-center justify-center transition-all",
-                cellSize,
-                theme.borderRadius,
-
-                disabled
-                  ? `${theme.disabledBg} ${theme.disabledText}`
-                  : isSelected
-                  ? `${theme.selectedBg} ${theme.selectedText} scale-105 shadow`
-                  : isToday(day) && highlightToday
-                  ? `${theme.todayBg} ${theme.todayText}`
-                  : isInRange
-                  ? "bg-blue-50 text-blue-600"
-                  : `${theme.normalText} ${theme.normalHoverBg}`,
-              ].join(" ")}
+              className={`
+                inline-flex items-center justify-center font-medium transition-all
+                ${cellSize}
+                ${theme.borderRadius}
+                ${
+                  disabled
+                    ? `${theme.disabledBg} ${theme.disabledText} cursor-not-allowed`
+                    : isSelected
+                    ? `${theme.selectedBg} ${theme.selectedText} scale-105 shadow-lg`
+                    : isToday(day) && highlightToday
+                    ? `${theme.todayBg} ${theme.todayText}`
+                    : isInRange
+                    ? "bg-blue-50 text-blue-600"
+                    : `${theme.normalText} ${theme.normalHoverBg} hover:scale-105`
+                }
+              `}
             >
               {day.getDate()}
             </button>
           );
         })}
       </div>
+
+      {/* Legend */}
+      {mode === "single" && (
+        <div className="mt-6 flex items-center justify-center space-x-4 text-sm">
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-blue-600 rounded mr-2"></div>
+            <span className="text-gray-600">Selected</span>
+          </div>
+          {highlightToday && (
+            <div className="flex items-center">
+              <div className="w-4 h-4 bg-blue-100 rounded mr-2"></div>
+              <span className="text-gray-600">Today</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {mode === "range" && (
+        <div className="mt-6 flex items-center justify-center space-x-4 text-sm">
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-blue-600 rounded mr-2"></div>
+            <span className="text-gray-600">Selected</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-blue-50 border border-blue-200 rounded mr-2"></div>
+            <span className="text-gray-600">In Range</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -2,6 +2,10 @@
 
 A highly customizable, flexible React calendar component with single and range date selection modes, built with TypeScript and Tailwind CSS.
 
+![npm version](https://img.shields.io/npm/v/react-boxed-calendar)
+![npm downloads](https://img.shields.io/npm/dm/react-boxed-calendar)
+![license](https://img.shields.io/npm/l/react-boxed-calendar)
+
 ## Features
 
 - 📅 Single date and date range selection modes
