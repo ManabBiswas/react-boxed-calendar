@@ -1,6 +1,6 @@
 {
   "name": "react-boxed-calendar",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A highly customizable, flexible React calendar component with single and range date selection modes, built with TypeScript and Tailwind CSS",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -8,9 +8,9 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
