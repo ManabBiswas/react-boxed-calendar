@@ -53,6 +53,13 @@ export interface CalendarProps {
 
   // Size
   size?: "sm" | "md" | "lg";
+
+  // Custom sizing (optional) - overrides size preset
+  customSize?: {
+    box?: number;     // full calendar width/height
+    cell?: number;    // each date cell size
+    gap?: number;     // spacing between cells
+  };
 }
 
 const Calendar = ({
@@ -111,6 +118,9 @@ const Calendar = ({
   },
 
   size = "md",
+
+  // Destructure customSize
+  customSize,
 }: CalendarProps) => {
   const [currentMonth, setCurrentMonth] = useState<Date>(
     selectedDate ?? new Date()
@@ -120,12 +130,20 @@ const Calendar = ({
     (selectedDate ?? new Date()).getFullYear() - 6
   );
 
-  const cellSize =
+  // Replaced cellSize logic with preset + custom support
+  const presetCellSize =
     size === "sm"
       ? "w-8 h-8 text-xs"
       : size === "lg"
       ? "w-14 h-14 text-lg"
       : "w-10 h-10 text-sm"; // md default
+
+  // Custom sizing styles with explicit px units
+  const cellStyle = customSize?.cell
+    ? { width: `${customSize.cell}px`, height: `${customSize.cell}px` }
+    : undefined;
+
+  const gridGap = customSize?.gap ?? 8;
 
   // Helpers
   const sameDay = (d1: Date | null, d2: Date | null) => {
@@ -258,7 +276,15 @@ const Calendar = ({
   const days = getDays();
 
   return (
-    <div className="p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
+    // Updated container with custom box size support
+    <div
+      style={
+        customSize?.box
+          ? { width: `${customSize.box}px`, height: `${customSize.box}px` }
+          : undefined
+      }
+      className="p-6 bg-white rounded-2xl shadow-lg border border-gray-100"
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         {!disableMonthNav && (
@@ -313,7 +339,10 @@ const Calendar = ({
 
       {activePanel === "month" && !disableMonthNav && (
         <div className="mb-4 p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
-          <div className="grid grid-cols-3 gap-2">
+          <div 
+            className="grid grid-cols-3"
+            style={{ gap: gridGap }}
+          >
             {locale.monthNames!.map((name, index) => {
               const isCurrent = index === currentMonth.getMonth();
               return (
@@ -362,7 +391,10 @@ const Calendar = ({
               </svg>
             </button>
           </div>
-          <div className="grid grid-cols-4 gap-2">
+          <div 
+            className="grid grid-cols-4"
+            style={{ gap: gridGap }}
+          >
             {Array.from({ length: 12 }, (_, i) => yearPageStart + i).map(
               (year) => {
                 const isCurrent = year === currentMonth.getFullYear();
@@ -386,8 +418,11 @@ const Calendar = ({
         </div>
       )}
 
-      {/* Week days */}
-      <div className="grid grid-cols-7 gap-2 mb-2">
+      {/* Week days - Updated with consistent gap */}
+      <div 
+        className="grid grid-cols-7 mb-2"
+        style={{ gap: gridGap }}
+      >
         {locale.weekDays!.map((d) => (
           <div
             key={d}
@@ -398,10 +433,19 @@ const Calendar = ({
         ))}
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-7 gap-2 place-items-center">
+      {/* Grid - Updated with custom gap and cell sizing */}
+      <div 
+        className="grid grid-cols-7 place-items-center"
+        style={{ gap: gridGap }}
+      >
         {days.map((day, i) => {
-          if (!day) return <div key={i} className={cellSize} />;
+          if (!day) return (
+            <div 
+              key={i} 
+              style={cellStyle}
+              className={customSize ? "" : presetCellSize} 
+            />
+          );
 
           const disabled = shouldDisable(day);
           const isSelected =
@@ -422,9 +466,10 @@ const Calendar = ({
               key={day.toISOString()}
               disabled={disabled}
               onClick={() => handleSelect(day)}
+              style={cellStyle}
               className={`
                 inline-flex items-center justify-center font-medium transition-all
-                ${cellSize}
+                ${customSize ? "" : presetCellSize}
                 ${theme.borderRadius}
                 ${
                   disabled
