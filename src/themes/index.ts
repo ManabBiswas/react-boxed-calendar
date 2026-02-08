@@ -3,6 +3,8 @@ import { darkTheme } from "./dark";
 import { metallicTheme } from "./metallic";
 
 export type CalendarTheme = {
+  containerBg?: string;
+  containerBorder?: string;
   selectedBg: string;
   selectedText: string;
   todayBg: string;

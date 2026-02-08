@@ -1,6 +1,9 @@
 import { type CalendarTheme } from "./index";
 
 export const lightTheme: CalendarTheme = {
+  containerBg: "bg-white",
+  containerBorder: "border border-gray-100",
+  
   selectedBg: "bg-blue-600",
   selectedText: "text-white",
 
