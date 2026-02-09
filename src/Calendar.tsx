@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { themes } from "./themes";
 
 export interface CalendarProps {
   // Modes
@@ -36,6 +37,9 @@ export interface CalendarProps {
 
   // Theme
   theme?: {
+    containerBg?: string;
+    containerBorder?: string;
+
     selectedBg?: string;
     selectedText?: string;
 
@@ -53,6 +57,8 @@ export interface CalendarProps {
 
   // Size
   size?: "sm" | "md" | "lg";
+  // theme Name 
+  themeName?: "light" | "dark" | "metallic";
 
   // Custom sizing (optional) - overrides size preset
   customSize?: {
@@ -101,27 +107,17 @@ const Calendar = ({
     ],
   },
 
-  theme = {
-    selectedBg: "bg-blue-600",
-    selectedText: "text-white",
-
-    todayBg: "bg-blue-100",
-    todayText: "text-blue-700",
-
-    normalText: "text-gray-700",
-    normalHoverBg: "hover:bg-gray-100",
-
-    disabledBg: "bg-gray-50",
-    disabledText: "text-gray-300",
-
-    borderRadius: "rounded-xl",
-  },
-
+  theme = {},
+  themeName = "light",
   size = "md",
 
   // Destructure customSize
   customSize,
 }: CalendarProps) => {
+  const resolvedTheme = {
+    ...themes[themeName],
+    ...theme, // custom overrides
+  };
   const [currentMonth, setCurrentMonth] = useState<Date>(
     selectedDate ?? new Date()
   );
@@ -276,24 +272,26 @@ const Calendar = ({
   const days = getDays();
 
   return (
-    // Updated container with custom box size support
-    <div
+    <div className={`
+    p-6 shadow-lg
+    ${resolvedTheme.containerBg}
+    ${resolvedTheme.containerBorder}
+    rounded-2xl
+  `}
       style={
         customSize?.box
           ? { width: `${customSize.box}px`, height: `${customSize.box}px` }
           : undefined
-      }
-      className="p-6 bg-white rounded-2xl shadow-lg border border-gray-100"
-    >
+      }>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         {!disableMonthNav && (
           <button
             onClick={() => changeMonth(-1)}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className={`p-2 ${resolvedTheme.normalHoverBg} rounded-full transition-colors`}
             aria-label="Previous month"
           >
-            <svg className="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className={`w-6 h-6 ${resolvedTheme.normalText}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
@@ -303,8 +301,8 @@ const Calendar = ({
           <button
             type="button"
             onClick={toggleMonthPanel}
-            className={`font-bold text-xl text-gray-900 px-2 py-1 rounded-lg transition-colors ${
-              disableMonthNav ? "cursor-default" : "hover:bg-gray-100"
+            className={`font-bold text-xl ${resolvedTheme.normalText} px-2 py-1 rounded-lg transition-colors ${
+              disableMonthNav ? "cursor-default" : `${resolvedTheme.normalHoverBg}`
             }`}
             aria-label="Select month"
             aria-expanded={activePanel === "month"}
@@ -314,8 +312,8 @@ const Calendar = ({
           <button
             type="button"
             onClick={toggleYearPanel}
-            className={`font-bold text-xl text-gray-900 px-2 py-1 rounded-lg transition-colors ${
-              disableMonthNav ? "cursor-default" : "hover:bg-gray-100"
+            className={`font-bold text-xl ${resolvedTheme.normalText} px-2 py-1 rounded-lg transition-colors ${
+              disableMonthNav ? "cursor-default" : `${resolvedTheme.normalHoverBg}`
             }`}
             aria-label="Select year"
             aria-expanded={activePanel === "year"}
@@ -327,10 +325,10 @@ const Calendar = ({
         {!disableMonthNav && (
           <button
             onClick={() => changeMonth(1)}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className={`p-2 ${resolvedTheme.normalHoverBg} rounded-full transition-colors`}
             aria-label="Next month"
           >
-            <svg className="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className={`w-6 h-6 ${resolvedTheme.normalText}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
@@ -338,11 +336,8 @@ const Calendar = ({
       </div>
 
       {activePanel === "month" && !disableMonthNav && (
-        <div className="mb-4 p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
-          <div 
-            className="grid grid-cols-3"
-            style={{ gap: gridGap }}
-          >
+        <div className={`mb-4 p-4 ${resolvedTheme.containerBg} border ${resolvedTheme.containerBorder} rounded-xl shadow-sm`}>
+          <div className="grid grid-cols-3" style={{ gap: gridGap }}>
             {locale.monthNames!.map((name, index) => {
               const isCurrent = index === currentMonth.getMonth();
               return (
@@ -352,8 +347,8 @@ const Calendar = ({
                   onClick={() => setMonth(index)}
                   className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                     isCurrent
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? `${resolvedTheme.selectedBg} text-white`
+                      : `${resolvedTheme.normalText} ${resolvedTheme.normalHoverBg}`
                   }`}
                 >
                   {name}
@@ -365,25 +360,25 @@ const Calendar = ({
       )}
 
       {activePanel === "year" && !disableMonthNav && (
-        <div className="mb-4 p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+        <div className={`mb-4 p-4 ${resolvedTheme.containerBg} border ${resolvedTheme.containerBorder} rounded-xl shadow-sm`}>
           <div className="flex items-center justify-between mb-3">
             <button
               type="button"
               onClick={() => setYearPageStart((prev) => prev - 12)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              className={`p-2 ${resolvedTheme.normalHoverBg} rounded-full transition-colors`}
               aria-label="Previous years"
             >
               <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <span className="text-sm font-semibold text-gray-700">
+            <span className={`text-sm font-semibold ${resolvedTheme.normalText}`}>
               {yearPageStart} - {yearPageStart + 11}
             </span>
             <button
               type="button"
               onClick={() => setYearPageStart((prev) => prev + 12)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              className={`p-2 ${resolvedTheme.normalHoverBg} rounded-full transition-colors`}
               aria-label="Next years"
             >
               <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -405,8 +400,8 @@ const Calendar = ({
                     onClick={() => setYear(year)}
                     className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                       isCurrent
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:bg-gray-100"
+                        ? `${resolvedTheme.selectedBg} text-white`
+                        : `${resolvedTheme.normalText} ${resolvedTheme.normalHoverBg}`
                     }`}
                   >
                     {year}
@@ -470,17 +465,17 @@ const Calendar = ({
               className={`
                 inline-flex items-center justify-center font-medium transition-all
                 ${customSize ? "" : presetCellSize}
-                ${theme.borderRadius}
+                ${resolvedTheme.borderRadius}
                 ${
                   disabled
-                    ? `${theme.disabledBg} ${theme.disabledText} cursor-not-allowed`
+                    ? `${resolvedTheme.disabledBg} ${resolvedTheme.disabledText} cursor-not-allowed`
                     : isSelected
-                    ? `${theme.selectedBg} ${theme.selectedText} scale-105 shadow-lg`
+                    ? `${resolvedTheme.selectedBg} ${resolvedTheme.selectedText} scale-105 shadow-lg`
                     : isToday(day) && highlightToday
-                    ? `${theme.todayBg} ${theme.todayText}`
+                    ? `${resolvedTheme.todayBg} ${resolvedTheme.todayText}`
                     : isInRange
                     ? "bg-blue-50 text-blue-600"
-                    : `${theme.normalText} ${theme.normalHoverBg} hover:scale-105`
+                    : `${resolvedTheme.normalText} ${resolvedTheme.normalHoverBg} hover:scale-105`
                 }
               `}
             >
@@ -494,13 +489,13 @@ const Calendar = ({
       {mode === "single" && (
         <div className="mt-6 flex items-center justify-center space-x-4 text-sm">
           <div className="flex items-center">
-            <div className="w-4 h-4 bg-blue-600 rounded mr-2"></div>
-            <span className="text-gray-600">Selected</span>
+            <div className={`w-4 h-4 rounded mr-2 ${resolvedTheme.selectedBg}`}></div>
+            <span className={resolvedTheme.normalText}>Selected</span>
           </div>
           {highlightToday && (
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-blue-100 rounded mr-2"></div>
-              <span className="text-gray-600">Today</span>
+              <div  className={`w-4 h-4 rounded mr-2 ${resolvedTheme.todayBg}`}></div>
+              <span className={resolvedTheme.normalText}>Today</span>
             </div>
           )}
         </div>
@@ -509,12 +504,12 @@ const Calendar = ({
       {mode === "range" && (
         <div className="mt-6 flex items-center justify-center space-x-4 text-sm">
           <div className="flex items-center">
-            <div className="w-4 h-4 bg-blue-600 rounded mr-2"></div>
-            <span className="text-gray-600">Selected</span>
+            <div className={`w-4 h-4 rounded mr-2 ${resolvedTheme.selectedBg}`}></div>
+            <span className={resolvedTheme.normalText}>Selected</span>
           </div>
           <div className="flex items-center">
             <div className="w-4 h-4 bg-blue-50 border border-blue-200 rounded mr-2"></div>
-            <span className="text-gray-600">In Range</span>
+            <span className={resolvedTheme.normalText}>In Range</span>
           </div>
         </div>
       )}
