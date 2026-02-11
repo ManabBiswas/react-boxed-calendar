@@ -608,6 +608,10 @@ const Calendar = ({
               <span className={resolvedTheme.normalText}>Today</span>
             </div>
           )}
+            <div className="flex items-center">
+              <div className={`w-4 h-4 rounded mr-2 ${holidayColor.bg}`}></div>
+              <span className={holidayColor.text}>Holiday</span>
+            </div>
         </div>
       )}
 
@@ -620,6 +624,10 @@ const Calendar = ({
           <div className="flex items-center">
             <div className="w-4 h-4 bg-blue-50 border border-blue-200 rounded mr-2"></div>
             <span className={resolvedTheme.normalText}>In Range</span>
+          </div>
+          <div className="flex items-center">
+            <div className={`w-4 h-4 rounded mr-2 ${holidayColor.bg}`}></div>
+              <span className={holidayColor.text}>Holiday</span>
           </div>
         </div>
       )}
