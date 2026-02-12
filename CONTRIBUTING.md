@@ -20,7 +20,6 @@ Thank you for your interest in contributing! We welcome contributions from the c
 - Follow the existing code style and conventions
 - Write clear, descriptive commit messages
 - Add tests for new functionality
-- Update documentation as needed
 
 ## Submitting Changes
 
